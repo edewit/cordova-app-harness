@@ -110,6 +110,7 @@ $CORDOVA platform add $PLATFORMS --link || exit 1
 set +x
 
 if [[ "$PLATFORMS" = *android* ]]; then
+  cp  "$AH_PATH"/template-overrides/build-extras.gradle platforms/android/build-extras.gradle
     echo 'var fs = require("fs");
           var fname = "platforms/android/src/org/apache/appharness/CordovaAppHarness.java";
           if (!fs.existsSync(fname)) {
@@ -146,13 +147,6 @@ set -x
     --searchpath="$PLUGIN_SEARCH_PATH" \
     $PLUGIN_REGISTRY_FLAG || exit $?
 
-if [[ "$PLATFORMS" = *android* ]]; then
-    if [[ -e plugins/cordova-plugin-file/src/android/build-extras.gradle ]]; then
-        cp plugins/cordova-plugin-file/src/android/build-extras.gradle platforms/android/build-extras.gradle
-    fi
-fi
-
-if [[ "$2" = "--allplugins" ]]; then
 "$CORDOVA" plugin add \
     cordova-plugin-battery-status \
     cordova-plugin-camera \
@@ -174,7 +168,25 @@ if [[ "$2" = "--allplugins" ]]; then
     --link \
     --searchpath="$PLUGIN_SEARCH_PATH" \
     $PLUGIN_REGISTRY_FLAG || exit $?
-fi
+
+# aerogear plugins
+#    https://github.com/edewit/aerogear-crypto-cordova.git#dependency-fix \
+"$CORDOVA" plugin add \
+    aerogear-cordova-otp \
+    aerogear-cordova-push \
+    https://github.com/gorkem/aerogear-cordova-oauth2.git#dependency_fix \
+    https://github.com/gorkem/aerogear-cordova-geo#dependency_fix \
+    --link \
+    --searchpath="$PLUGIN_SEARCH_PATH" \
+    $PLUGIN_REGISTRY_FLAG || exit $?
+
+# feedhenry plugins
+"$CORDOVA" plugin add \
+    https://github.com/fheng/fh-cordova-plugins-api.git#fh0.0.6 \
+    https://github.com/feedhenry/fh-cordova-plugin-orientation.git#fh0.0.1 \
+    --link \
+    --searchpath="$PLUGIN_SEARCH_PATH" \
+    $PLUGIN_REGISTRY_FLAG || exit $?
 
 # To enable barcode scanning:
 # $CORDOVA plugin add https://github.com/wildabeast/BarcodeScanner.git # Optional
@@ -185,4 +197,3 @@ ln -s "$CORDOVA" .
 set +x
 echo "Project successfully created at:"
 pwd
-
